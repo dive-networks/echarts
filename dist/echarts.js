@@ -4167,6 +4167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param  {number} [options.ellipsis='...']
 	     * @param  {number} [options.maxIterations=3]
 	     * @param  {number} [options.minCharacters=3]
+	     * @param  {bool}   [options.wrapLongText=false]
 	     * @return {string}
 	     */
 	    function textEllipsis(text, textFont, containerWidth, options) {
@@ -4179,6 +4180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            minCharacters: 3,
 	            maxIterations: 3,
 	            cnCharWidth: getTextWidth('国', textFont),
+	            wrapLongText: false,
 	            // FIXME
 	            // 未考虑非等宽字体
 	            ascCharWidth: getTextWidth('a', textFont)
@@ -4187,14 +4189,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	        containerWidth -= getTextWidth(options.ellipsis);
 
 	        var textLines = (text + '').split('\n');
+	        var truncationFn = (options.wrapLongText === true) ?
+	            textLineWrap : textLineTruncate;
 
 	        for (var i = 0, len = textLines.length; i < len; i++) {
-	            textLines[i] = textLineTruncate(
+	            textLines[i] = truncationFn(
 	                textLines[i], textFont, containerWidth, options
 	            );
 	        }
 
 	        return textLines.join('\n');
+	    }
+
+	    function textLineWrap(text, textFont, containerWidth, options) {
+	        var truncate = function(remainingText, textSplits) {
+	            if (!remainingText.length) {
+	                return textSplits.join('\n');
+	            }
+
+	            var lineWidth = getTextWidth(remainingText, textFont);
+
+	            if (lineWidth < containerWidth) {
+	                textSplits.push(remainingText);
+	                remainingText = "";
+	            }
+	            else {
+	                var subLength = estimateLength(text, containerWidth, options);
+	                var textPart = remainingText.substr(0, subLength);
+	                remainingText = remainingText.substr(subLength);
+	                textSplits.push(textPart);
+	            }
+
+	            return truncate(remainingText, textSplits);
+	        }
+
+	        return truncate(text, []);
 	    }
 
 	    function textLineTruncate(text, textFont, containerWidth, options) {
@@ -32269,6 +32298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function setText(text, style, nodeModel, labelPath, visualColor, contentWidth, contentHeight) {
 	            var labelModel = nodeModel.getModel(labelPath);
 	            var labelTextStyleModel = labelModel.getModel('textStyle');
+	            var wrapText = nodeModel.get("wrapLongText");
 
 	            graphic.setText(style, labelModel, visualColor);
 
@@ -32283,8 +32313,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                style.text = '';
 	            }
 	            else if (textRect.width > contentWidth) {
+	                var options = { wrapLongText: wrapText };
 	                style.text = labelTextStyleModel.get('ellipsis')
-	                    ? labelTextStyleModel.ellipsis(text, contentWidth) : '';
+	                    ? labelTextStyleModel.ellipsis(text, contentWidth, options) : '';
 	            }
 	            else {
 	                style.text = text;
