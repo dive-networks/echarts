@@ -1,3 +1,12 @@
+/*!
+ * ECharts, a javascript interactive chart library.
+ *
+ * Copyright (c) 2015, Baidu Inc.
+ * All rights reserved.
+ *
+ * LICENSE
+ * https://github.com/ecomfe/echarts/blob/master/LICENSE.txt
+ */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -4202,8 +4211,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function textLineWrap(text, textFont, containerWidth, options) {
-	        var truncate = function(remainingText, textSplits) {
-	            if (!remainingText.length) {
+	        var truncate = function(remainingText, textSplits, iterationCount) {
+	            if (!remainingText.length || iterationCount >= options.maxIterations) {
 	                return textSplits.join('\n');
 	            }
 
@@ -4220,10 +4229,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                textSplits.push(textPart);
 	            }
 
-	            return truncate(remainingText, textSplits);
+	            return truncate(remainingText, textSplits, iterationCount + 1);
 	        }
 
-	        return truncate(text, []);
+	        return truncate(text, [], 0);
 	    }
 
 	    function textLineTruncate(text, textFont, containerWidth, options) {
