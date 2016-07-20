@@ -11623,7 +11623,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            for (var i = 0; i < textLines.length; i++) {
 	                textFill && ctx.fillText(textLines[i], x, y);
 	                textStroke && ctx.strokeText(textLines[i], x, y);
-	                y += textRect.lineHeight;
+	                y += textRect.lineHeight * 1.5;
 	            }
 
 	            // Transform again
